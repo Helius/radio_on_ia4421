@@ -31,6 +31,10 @@ int main (void)
 	rfm12_init ();
 	sei();
 
+// dont'work with it!!!!
+	LED_GRN_ON;
+	__delay_cycles (65000);
+	LED_GRN_OFF;
 	while (1) {
 
 		// on btn press send data
@@ -48,6 +52,9 @@ int main (void)
 		// if we receive something	
 		if (rfm12_rx_status() == STATUS_COMPLETE) {
 			LED_RED_ON;
+			__delay_cycles (65000);
+			__delay_cycles (65000);
+			__delay_cycles (65000);
 			__delay_cycles (65000);
 			rfm12_rx_clear (); // realise rx buffer
 			LED_RED_OFF;

@@ -29,16 +29,24 @@ int main (void)
 	init_gpio ();
 	rfm12_init ();
 	sei();
+			
+// dont'work with it!!!!
+	LED_RED_ON;
+	__delay_cycles (65000);
+	LED_RED_OFF;
 
 	while (1) {
 
-		__delay_cycles (65000);
 		// if we receive something	
 		if (rfm12_rx_status() == STATUS_COMPLETE) {
 			LED_RED_ON;
 			__delay_cycles (65000);
 			rfm12_rx_clear (); // realise rx buffer
 			LED_RED_OFF;
+			LED_GRN_ON;
+			__delay_cycles (65000);
+			rfm12_tx (5, 0, tx_data);
+			LED_GRN_OFF;
 		}
 		rfm12_tick();
 	}
