@@ -19,20 +19,19 @@ server: server.hex
 	@echo "done"
 
 
-
 client.hex : client.elf
 	$(OBJCOPY) -R .eeprom -O ihex client.elf client.hex
 	avr-size client.elf
 
-client.elf : client.o
-	$(CC) $(CFLAGS) -o client.elf client.o
+client.elf : client.o rfm12.o delay.o
+	$(CC) $(CFLAGS) -o client.elf client.o rfm12.o delay.o
 
 server.hex : server.elf
 	$(OBJCOPY) -R .eeprom -O ihex server.elf server.hex
 	avr-size server.elf
 
-server.elf : server.o
-	$(CC) $(CFLAGS) -o server.elf server.o
+server.elf : server.o rfm12.o delay.o
+	$(CC) $(CFLAGS) -o server.elf server.o rfm12.o delay.o
 
 
 
