@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include "rfm12.h"
 #include "board.h"
 #include "delay.h"
@@ -14,6 +15,15 @@
 #define TST_BIT(reg,bit) (reg&(1<<bit))
 
 char tx_data[] = "12345";
+
+
+void go_sleep (void)
+{
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	sleep_enable();
+	sleep_cpu();
+}
+
 
 void init_gpio (void)
 {
@@ -35,16 +45,22 @@ int main (void)
 	LED_GRN_ON;
 	__delay_cycles (65000);
 	LED_GRN_OFF;
-	while (1) {
 
+	while (1) {
 		// on btn press send data
-		if (!TST_BIT(PINC,BTN_TMP) && (btn_press == false)) {
-			LED_GRN_ON;
-			__delay_cycles (65000);
+	//	if (!TST_BIT(PINC,BTN_TMP) && (btn_press == false)) {
 			btn_press = true;
-			rfm12_tx (5, 0, tx_data);
+			if (rfm12_tx (5, 0, tx_data) == RFM12_TX_ENQUEUED) {
+				LED_GRN_ON;
+			}
+			else {
+				LED_RED_ON;
+			}
+			__delay_cycles (65000);
+			LED_RED_OFF;
 			LED_GRN_OFF;
-		}
+
+	//	}
 		if (TST_BIT(PINC,BTN_TMP)) {
 			btn_press = false;
 		}
@@ -54,14 +70,15 @@ int main (void)
 			LED_RED_ON;
 			__delay_cycles (65000);
 			__delay_cycles (65000);
-			__delay_cycles (65000);
-			__delay_cycles (65000);
 			rfm12_rx_clear (); // realise rx buffer
 			LED_RED_OFF;
 		}
+		rfm12_set_wakeup_timer(1124);	
 		rfm12_tick();
+			__delay_cycles (65000);
+		go_sleep();
 
-
+// rfm12_rx_clear
 	}
 	return 0;
 }
