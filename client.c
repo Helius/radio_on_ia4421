@@ -16,6 +16,13 @@
 
 char tx_data[] = "12345";
 
+/* helius disable wakeup and clock sourse, set timeout, enable timer and disable clock source*/
+void rfm12_setup_wakeup_timer (uint16_t sec)
+{
+		rfm12_data (0x8201);											// Отключить таймер
+		rfm12_data (0xEA00 | sec);								// T = 1.03 * 2^10 * period + 0.5 мс
+		rfm12_data (0x8203);											// Включить таймер
+}
 
 void go_sleep (void)
 {
@@ -73,9 +80,11 @@ int main (void)
 			rfm12_rx_clear (); // realise rx buffer
 			LED_RED_OFF;
 		}
-		rfm12_set_wakeup_timer(1124);	
 		rfm12_tick();
-			__delay_cycles (65000);
+
+
+		rfm12_setup_wakeup_timer (3);
+		__delay_cycles (65000);
 		go_sleep();
 
 // rfm12_rx_clear
