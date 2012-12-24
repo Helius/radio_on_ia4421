@@ -126,7 +126,7 @@
 #define RFM12_LIVECTRL 0
 #define RFM12_NORETURNS 0
 #define RFM12_NOCOLLISIONDETECTION 1
-#define RFM12_TRANSMIT_ONLY 0
+#define RFM12_TRANSMIT_ONLY 1
 #define RFM12_SPI_SOFTWARE 0
 #define RFM12_USE_POLLING 0
 #define RFM12_RECEIVE_ASK 0
@@ -140,4 +140,4 @@
  * en- or disable debugging via uart.
  */
  
-#define RFM12_UART_DEBUG 3
+#define RFM12_UART_DEBUG 0
