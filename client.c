@@ -172,6 +172,7 @@ void adc_off () {
 	PORTC &=~(1<<2); 
 }
 
+#define STATE_TX 3
 uint8_t payload [8];
 int main (void)
 {
@@ -189,6 +190,9 @@ int main (void)
 	LED_GRN_OFF;
 	
 	while (1) {
+		if (ctrl.rfm12_state == STATE_TX) {
+			goto sleep_;
+		}
 		LED_RED_ON;
 		//get temperature
 		//__delay_cycles (65000);
@@ -204,6 +208,7 @@ int main (void)
 		__delay_cycles (65000);
 		__delay_cycles (20000);
 		LED_RED_OFF;
+sleep_:
 		go_sleep();
 	}
 	return 0;
