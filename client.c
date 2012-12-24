@@ -190,9 +190,7 @@ int main (void)
 	LED_GRN_OFF;
 	
 	while (1) {
-		if (ctrl.rfm12_state == STATE_TX) {
-			goto sleep_;
-		}
+		
 		LED_RED_ON;
 		//get temperature
 		//__delay_cycles (65000);
@@ -207,8 +205,8 @@ int main (void)
 		rfm12_tick();
 		__delay_cycles (65000);
 		__delay_cycles (20000);
+		while(ctrl.rfm12_state == STATE_TX);
 		LED_RED_OFF;
-sleep_:
 		go_sleep();
 	}
 	return 0;
