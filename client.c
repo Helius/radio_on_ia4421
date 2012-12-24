@@ -168,8 +168,8 @@ int adc_get () {
 
 void adc_off () {
 	ADCSRA = 0;
-	//DDRC &=~(1<<2); 
-	//PORTC &=~(1<<2); 
+	DDRC &=~(1<<2); 
+	PORTC &=~(1<<2); 
 }
 
 uint8_t payload [8];
@@ -179,7 +179,7 @@ int main (void)
 	sei();
 	rfm12_init ();
 	rfm12_set_wakeup_timer(0xEA00 | 5);
-	uart_init();
+//	uart_init();
 	
 // dont'work with it!!!!
 	LED_GRN_ON;
@@ -189,20 +189,20 @@ int main (void)
 	LED_GRN_OFF;
 	
 	while (1) {
+		LED_RED_ON;
 		//get temperature
 		//__delay_cycles (65000);
-		__delay_cycles (65000);
+		__delay_cycles (25000);
 		payload[0] = 0xF0;
 		payload[1] = 0xF1;
 		payload[2] = adc_get();
-		__delay_cycles (65000);
+		//__delay_cycles (65000);
 		adc_off();
 
-		LED_RED_ON;
-		__delay_cycles (65000);
 		rfm12_tx (3, 0, payload);
 		rfm12_tick();
 		__delay_cycles (65000);
+		__delay_cycles (20000);
 		LED_RED_OFF;
 		go_sleep();
 	}
