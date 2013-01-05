@@ -17,33 +17,6 @@
 char tx_data[] = "12345";
 
 
-unsigned int SPI_MasterTransmit(char cData_high, char cData_low)
-{
-char t1;
-char t2;
-unsigned int temp = 0x0000;    
-  PORTB &= ~(1 << PORTB2);                        // Вывод SS переводим в низкий уровень
-  SPDR = cData_high;                              // Запуск передачи байта
-  while(!(SPSR & (1<<SPIF)));                     // Ожидание завершения передачи данных 
-  t1 = SPDR;
-  SPDR = cData_low;                               // Запуск передачи байта
-  while(!(SPSR & (1<<SPIF)));                     // Ожидание завершения передачи данных 
-  t2 = SPDR;
-  PORTB |= (1 << PORTB2);                         // Вывод SS переводим в высокий уровень
-  temp = t1;
-  temp <<= 8;                                     // сдвигаем влево на 1 и присваиваем
-  temp |= t2;    
-  return (temp);     
-}
-
-
-/* helius disable wakeup and clock sourse, set timeout, enable timer and disable clock source*/
-void rfm12_setup_wakeup_timer (uint16_t sec)
-{
-//		rfm12_data (0x8201);											// Отключить таймер
-//		rfm12_data (0xEA00 | sec);								// T = 1.03 * 2^10 * period + 0.5 мс
-//		rfm12_data (0x820B);											// Включить таймер
-}
 
 void go_sleep (void)
 {
@@ -60,8 +33,8 @@ void init_gpio (void)
 {
 	DDRD |= (1<<LED_GRN) | (1<<LED_RED);
 	PORTD = 1<<PD2;
-	DDRC |= (1<<PD2);
-	PORTC = 1<<PD2;
+	DDRC |= (1<<ADC_EN);
+	PORTC |= (1<<ADC_EN);
 }
 void clear_gpio (void)
 {
@@ -69,32 +42,32 @@ void clear_gpio (void)
 
 
 int adc_get () {
-	ADCSRA = 0;
 	ADMUX = (1<<REFS1) | (1<<REFS0) | (1<<MUX0) | (1<<MUX1) | (1<<ADLAR);
+	//ADMUX = (1<<REFS1) | (1<<REFS0) | (1<<MUX3) |(1<<MUX2) | (1<<MUX1) | (1<<ADLAR);
+	__delay_cycles (5000);
 	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS0);
 	ADCSRA |= 1<<ADSC;
-	//DIDR0 = (1<<ADC3D);
 	while (ADCSRA & (1<<ADIF));
 	return ADCH;
 }
 
 void adc_off () {
 	ADCSRA = 0;
-	DDRC &=~(1<<2); 
-	PORTC &=~(1<<2); 
 }
 
 int wake_up_me;
 
 #define STATE_TX 3
 uint8_t payload [8];
+uint8_t Ubatt;
+uint8_t adc_idle = 0;
 int main (void)
 {
 	init_gpio ();
 	sei();
 	rfm12_init ();
 	rfm12_set_wakeup_timer(0xEA00 | 5);
-	uart_init();
+	//uart_init();
 	
 // dont'work with it!!!!
 	LED_GRN_ON;
@@ -106,34 +79,54 @@ int main (void)
 	while (1) {
 			
 		LED_GRN_ON;
-		//get temperature
-		__delay_cycles (25000);
-		payload[0] = 0xa0;
-		payload[1] = 0xa1;
-		payload[2] = adc_get();
-		adc_off();
 
+		// get battery voltage
+		if (!adc_idle--) {
+			adc_idle = 10;
+			//get temperature
+			DDRC |= (1<<2);
+			PORTC |= (1<<2);
+			__delay_cycles (5000);
+			adc_get();
+			unsigned int tmp = adc_get();
+			Ubatt = (tmp*17)/100;
+			adc_off();
+			DDRC &=~(1<<2); 
+			PORTC &=~(1<<2); 
+		}
+
+		// get temperature data
+		payload[0] = 1;
+		payload[1] = 2;
+		payload[2] = Ubatt;
+
+		/*    TX     */
+#include "rfm12/src/include/rfm12_hw.h"
+#include "rfm12/src/include/rfm12_core.h"
+		rfm12_data(RFM12_CMD_CFG | RFM12_CFG_EL | RFM12_CFG_EF | RFM12_BASEBAND | RFM12_XTAL_12PF);
 		rfm12_tx (3, 0, payload);
 		rfm12_tick();
 		//wait while TX complite, otherwise Tx interrupt will wakeup us!
 		while(ctrl.rfm12_state == STATE_TX);
 		LED_GRN_OFF;
 
+
+		/*    RX     */
 		LED_RED_ON;
 		while (rfm12_rx_status() != STATUS_COMPLETE);
 		rfm12_rx_clear ();	
-#include "rfm12/src/include/rfm12_hw.h"
-#include "rfm12/src/include/rfm12_core.h"
-	/*		__delay_cycles (65000);
-			__delay_cycles (65000);
-			__delay_cycles (65000);*/
+
+
+
+
+
+		/*    SLEEP     */
 		rfm12_data(RFM12_CMD_CFG | RFM12_BASEBAND | RFM12_XTAL_12PF);
 		rfm12_data(CLEAR_FIFO);
-		//__delay_cycles (65000);
 		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
 		LED_RED_OFF;
-			go_sleep();
-		rfm12_data(RFM12_CMD_CFG | RFM12_CFG_EL | RFM12_CFG_EF | RFM12_BASEBAND | RFM12_XTAL_12PF);
+		go_sleep();
+
 	}
 	return 0;
 }
