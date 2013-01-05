@@ -84,6 +84,8 @@ void adc_off () {
 	PORTC &=~(1<<2); 
 }
 
+int wake_up_me;
+
 #define STATE_TX 3
 uint8_t payload [8];
 int main (void)
@@ -92,7 +94,7 @@ int main (void)
 	sei();
 	rfm12_init ();
 	rfm12_set_wakeup_timer(0xEA00 | 5);
-//	uart_init();
+	uart_init();
 	
 // dont'work with it!!!!
 	LED_GRN_ON;
@@ -102,22 +104,36 @@ int main (void)
 	LED_GRN_OFF;
 	
 	while (1) {
-		
-		LED_RED_ON;
+			
+		LED_GRN_ON;
 		//get temperature
 		__delay_cycles (25000);
-		payload[0] = 0xF0;
-		payload[1] = 0xF1;
+		payload[0] = 0xa0;
+		payload[1] = 0xa1;
 		payload[2] = adc_get();
 		adc_off();
 
 		rfm12_tx (3, 0, payload);
 		rfm12_tick();
-		__delay_cycles (65000);
-		__delay_cycles (20000);
+		//wait while TX complite, otherwise Tx interrupt will wakeup us!
 		while(ctrl.rfm12_state == STATE_TX);
+		LED_GRN_OFF;
+
+		LED_RED_ON;
+		while (rfm12_rx_status() != STATUS_COMPLETE);
+		rfm12_rx_clear ();	
+#include "rfm12/src/include/rfm12_hw.h"
+#include "rfm12/src/include/rfm12_core.h"
+	/*		__delay_cycles (65000);
+			__delay_cycles (65000);
+			__delay_cycles (65000);*/
+		rfm12_data(RFM12_CMD_CFG | RFM12_BASEBAND | RFM12_XTAL_12PF);
+		rfm12_data(CLEAR_FIFO);
+		//__delay_cycles (65000);
+		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
 		LED_RED_OFF;
-		go_sleep();
+			go_sleep();
+		rfm12_data(RFM12_CMD_CFG | RFM12_CFG_EL | RFM12_CFG_EF | RFM12_BASEBAND | RFM12_XTAL_12PF);
 	}
 	return 0;
 }

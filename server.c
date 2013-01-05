@@ -30,12 +30,15 @@ int main (void)
 	uart_init();
 	init_gpio ();
 	rfm12_init ();
+
 	sei();
 	char msg [32];
 // dont'work with it!!!!
 	LED_RED_ON;
 	__delay_cycles (65000);
 	LED_RED_OFF;
+				
+	uart_putstr ("server start\n\r");
 
 	while (1) {
 
@@ -52,8 +55,12 @@ int main (void)
 			LED_RED_ON;
 			__delay_cycles (65000);
 			LED_RED_OFF;
+			rfm12_tx(3,0,"ok!");
+			rfm12_tick();
+			LED_GRN_ON;
+			__delay_cycles (65000);
+			LED_GRN_OFF;
 			//__delay_cycles (65000);
-			
 		}
 		rfm12_tick();
 	}
