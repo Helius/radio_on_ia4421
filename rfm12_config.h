@@ -79,16 +79,16 @@
 #define FREQ 433175000UL
 
 //use this for datarates >= 2700 Baud
-#define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(9600.0)
+#define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(4800.0)
 
 //use this for 340 Baud < datarate < 2700 Baud
 //#define DATARATE_VALUE RFM12_DATARATE_CALC_LOW(1200.0)
 
 //TX BUFFER SIZE
-#define RFM12_TX_BUFFER_SIZE 30
+#define RFM12_TX_BUFFER_SIZE 60
 
 //RX BUFFER SIZE (there are going to be 2 Buffers of this size for double_buffering)
-#define RFM12_RX_BUFFER_SIZE 30
+#define RFM12_RX_BUFFER_SIZE 60
 
 
 /************************
@@ -115,6 +115,9 @@
 //setup the interrupt to trigger on negative edge
 #define RFM12_INT_SETUP() EICRA |= (1<<ISC01)
 
+//setup the interrupt to trigger on low level
+#define RFM12_WAKEUP_INT_SETUP() EICRA=0;
+
 
 /************************
  * FEATURE CONFIGURATION
@@ -122,13 +125,13 @@
 
 #define RFM12_LIVECTRL 0
 #define RFM12_NORETURNS 0
-#define RFM12_NOCOLLISIONDETECTION 0
+#define RFM12_NOCOLLISIONDETECTION 1
 #define RFM12_TRANSMIT_ONLY 0
 #define RFM12_SPI_SOFTWARE 0
 #define RFM12_USE_POLLING 0
 #define RFM12_RECEIVE_ASK 0
 #define RFM12_TRANSMIT_ASK 0
-#define RFM12_USE_WAKEUP_TIMER 0
+#define RFM12_USE_WAKEUP_TIMER 1
 #define RFM12_LOW_POWER 0
 
 
