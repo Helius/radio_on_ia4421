@@ -14,6 +14,15 @@ BOARD:
 I use custom prebuild boards without src files, so it is not interresting to publish it here.
 Schematic very simple with direct powering board from battery without any converting (IA4421 powering voltage diapason is 3.6 to 2.5, but it work fine with 4.5 to 2.5)
 
+BUILDING:
+
+commands
+	make client
+and
+	make server
+produce client.hex and server.hex, 
+NOTE!! for client build we could enable wakeup timer in RFM12_config, for server - disable! With Makefile this may be done automatically, later i fix Makefile.
+
 FLASH MC:
 
 flash atmega48 with command (for ft2232 based programmer), client for example
