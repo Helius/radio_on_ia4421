@@ -1,0 +1,21 @@
+
+DESCRIPTION:
+
+This is project contains two parts, client and server. 
+Clietn is small board on Atmega48 + IA4421 transceiver + DS18S20 temperature sensor, powered from 3 AA battery. Client stays in deep sleep all time, but one of 1 minutes it wakeup, gets temperature, sends it to server and goes sleep again. One time of 10 minutes it get (with ADC) battery voltage, and sends it to server too.
+Server board is the same except DS18S20 sensor, it always listens for client data, and put it through UART (i use UART to USB converter).
+
+For IA4421 i use git@github.com:flukso/rfm12.git library (master branch), but it does not give methods for deep IA4421 deep sleep, so i add hack to my code with direct write to transceiver register to disable RX and TX.
+
+Now, client power consuption in deep sleep mode about 2-4 microAmpers (x10^-6 A), my multimetr is not so precision and lays, i think ))
+
+BOARD:
+
+I use custom prebuild boards without src files, so it is not interresting to publish it here.
+Schematic very simple with direct powering board from battery without any converting (IA4421 powering voltage diapason is 3.6 to 2.5, but it work fine with 4.5 to 2.5)
+
+FLASH MC:
+
+flash atmega48 with command (for ft2232 based programmer), client for example
+	avreal +ATmega48 -aft2232:enable=adbus4 -pd="Dual RS232 A" -ew -v -c client.hex
+
