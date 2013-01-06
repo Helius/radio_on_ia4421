@@ -23,8 +23,8 @@ client.hex : client.elf
 	$(OBJCOPY) -R .eeprom -O ihex client.elf client.hex
 	avr-size client.elf
 
-client.elf : client.o rfm12.o delay.o uart.o
-	$(CC) $(CFLAGS) -o client.elf client.o rfm12.o delay.o uart.o
+client.elf : client.o rfm12.o delay.o uart.o 1wire.o
+	$(CC) $(CFLAGS) -o client.elf client.o rfm12.o delay.o uart.o 1wire.o
 
 server.hex : server.elf
 	$(OBJCOPY) -R .eeprom -O ihex server.elf server.hex

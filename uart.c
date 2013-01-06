@@ -15,13 +15,13 @@
 #define UART_BAUD_CALC(UART_BAUD_RATE,F_OSC) ((F_OSC)/((UART_BAUD_RATE)*16L)-1)
 
 
-void uart_init() {
+void uart_init(void) {
    UBRR0L = 25;
    UBRR0H = 0x00;
    // установка формата посылки, 8 бит данных, 1 стоп-бит
    UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);
    // разрешение работы приемника и передатчика
-   UCSR0B = ((1 << RXEN0) | (1 << TXEN0));
+   UCSR0B = ((0 << RXEN0) | (1 << TXEN0));
 }
 
 void uart_putc(char ch) {
@@ -62,7 +62,7 @@ void uart_hexdump(char *buf, int len)
 	}
 }
 
-char uart_getc()
+char uart_getc(void)
 {
 	while (!(UCSR0A & (1<<RXC0)));	// warten bis Zeichen verfuegbar
 	return UDR0;			// Zeichen aus UDR zurueckgeben

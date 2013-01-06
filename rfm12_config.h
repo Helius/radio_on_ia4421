@@ -79,13 +79,13 @@
 #define FREQ 433175000UL
 
 //use this for datarates >= 2700 Baud
-//#define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(9600.0)
+#define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(4800.0)
 
 //use this for 340 Baud < datarate < 2700 Baud
-#define DATARATE_VALUE RFM12_DATARATE_CALC_LOW(1200.0)
+//#define DATARATE_VALUE RFM12_DATARATE_CALC_LOW(1200.0)
 
 //TX BUFFER SIZE
-#define RFM12_TX_BUFFER_SIZE 30
+#define RFM12_TX_BUFFER_SIZE 60
 
 //RX BUFFER SIZE (there are going to be 2 Buffers of this size for double_buffering)
 #define RFM12_RX_BUFFER_SIZE 60

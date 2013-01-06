@@ -30,6 +30,7 @@ int main (void)
 	uart_init();
 	init_gpio ();
 	rfm12_init ();
+	//rfm12_set_wakeup_timer(0xEA00 | 40);
 
 	sei();
 	char msg [32];
@@ -47,10 +48,26 @@ int main (void)
 			uint8_t * buf = rfm12_rx_buffer();
 			int i;
 			for (i = 0; i < rfm12_rx_len(); i++) {
-				sprintf (msg, "%d.", buf[i]);
+				sprintf (msg, "%d ", buf[i]);
 				uart_putstr (msg);
 			}
 			uart_putstr ("\n\r");
+			int div;
+			if (buf[0] == 0) {
+				if (buf[1]&1)
+					div = 5;
+				else
+					div = 0;
+				sprintf (msg, "#%d.%d\n\r", buf[1]/2,div);
+			} else {
+				int tmp = (buf[1]^0xFF)+1;
+				if (tmp&1)
+					div = 5;
+				else
+					div = 0;
+				sprintf (msg, "#-%d.%d\n\r",tmp/2,div);
+			}
+			uart_putstr(msg);
 			rfm12_rx_clear (); // realise rx buffer
 			LED_RED_ON;
 			__delay_cycles (65000);
